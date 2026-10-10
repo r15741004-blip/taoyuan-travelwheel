@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>逛逛「桃花園」</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #a9d8f2;
+    --blue-l: #e4f4fc;
+    --blue-d: #4f9fcf;
+    --pink: #f8c3d6;
+    --pink-l: #fde8f0;
+    --pink-d: #e0789f;
+    --ink: #34495e;
+    --muted: #6b7f92;
+    --card: #ffffff;
+    --shadow: 0 10px 30px rgba(79, 159, 207, 0.15);
+    --radius: 22px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    color: var(--ink);
+    background: linear-gradient(160deg, #e6f4fd 0%, #f7f9fd 45%, #fdeef4 100%);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  .round { font-family: "Huninn", "Noto Sans TC", sans-serif; }
+
+  /* ===== 頁首 ===== */
+  header {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 28px 20px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .brand h1 {
+    font-family: "Huninn", sans-serif;
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 400;
+    letter-spacing: 1px;
+  }
+  .brand h1 .peach { color: var(--pink-d); }
+  .brand p { color: var(--muted); font-size: 15px; margin-top: 2px; }
+  #muteBtn {
+    flex-shrink: 0;
+    border: 2px solid var(--blue);
+    background: var(--card);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+  }
+  #muteBtn:hover { background: var(--blue-l); }
+  #muteBtn:active { transform: scale(.96); }
+
+  /* ===== 步驟條 ===== */
+  .steps {
+    max-width: 1080px;
+    margin: 14px auto 0;
+    padding: 0 20px;
+    display: flex;
+    list-style: none;
+    gap: 8px;
+  }
+  .steps li {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.6);
+    color: var(--muted);
+    font-size: 15px;
+    transition: all .3s;
+  }
+  .steps .num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    background: #fff;
+    border: 2px solid var(--blue);
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .steps li.active {
+    background: var(--card);
+    color: var(--ink);
+    font-weight: 700;
+    box-shadow: var(--shadow);
+  }
+  .steps li.active .num { background: var(--pink); border-color: var(--pink-d); color: #fff; }
+  .steps li.done .num { background: var(--blue); border-color: var(--blue-d); color: #fff; }
+  .steps li.done { color: var(--ink); }
+
+  /* ===== 主畫面 ===== */
+  main {
+    max-width: 1080px;
+    margin: 20px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 26px;
+  }
+  .wheel-card { text-align: center; }
+  .wheel-card h2 {
+    font-family: "Huninn", sans-serif;
+    font-weight: 400;
+    font-size: 22px;
+    margin-bottom: 14px;
+  }
+  .wheel-wrap {
+    position: relative;
+    width: min(440px, 82vw);
+    margin: 0 auto;
+    aspect-ratio: 1 / 1;
+  }
+  #wheel { width: 100%; height: 100%; display: block; }
+  .pointer {
+    position: absolute;
+    top: -6px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 34px solid var(--pink-d);
+    filter: drop-shadow(0 3px 3px rgba(0,0,0,.18));
+    z-index: 2;
+  }
+  .btn {
+    font-family: "Huninn", "Noto Sans TC", sans-serif;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 26px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform .1s, box-shadow .2s, opacity .2s, background .2s;
+  }
+  .btn:active:not(:disabled) { transform: scale(.96); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-main {
+    margin-top: 20px;
+    background: linear-gradient(135deg, var(--pink) 0%, var(--pink-d) 100%);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(224, 120, 159, .35);
+    min-width: 200px;
+  }
+  .btn-main:hover:not(:disabled) { box-shadow: 0 8px 22px rgba(224, 120, 159, .5); }
+  .btn-sub {
+    background: var(--blue-l);
+    color: var(--ink);
+    border: 2px solid var(--blue);
+  }
+  .btn-sub:hover:not(:disabled) { background: var(--blue); }
+  .btn-next {
+    background: var(--blue-d);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(79, 159, 207, .35);
+  }
+  .btn-next:hover:not(:disabled) { background: #3f8fbf; }
+
+  /* ===== 結果卡 ===== */
+  .result-card { min-height: 420px; display: flex; flex-direction: column; }
+  .result-card .label {
+    display: inline-block;
+    align-self: flex-start;
+    background: var(--pink-l);
+    color: var(--pink-d);
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .hint {
+    color: var(--muted);
+    font-size: 17px;
+    margin: auto 0;
+    text-align: center;
+    padding: 30px 10px;
+  }
+  .hint .big { font-size: 54px; display: block; margin-bottom: 10px; }
+  .picked-area {
+    background: var(--blue-l);
+    border-radius: 16px;
+    padding: 12px 16px;
+    font-size: 15px;
+    margin-bottom: 16px;
+  }
+  .picked-area b { font-family: "Huninn", sans-serif; font-weight: 400; font-size: 17px; }
+  .result-emoji { font-size: 64px; line-height: 1; margin-bottom: 8px; }
+  .result-name {
+    font-family: "Huninn", sans-serif;
+    font-weight: 400;
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .result-desc { font-size: 17px; margin-bottom: 14px; }
+  .info-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--pink-l);
+    color: var(--pink-d);
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 15px;
+    transition: background .2s;
+  }
+  .map-link:hover { background: var(--pink); color: #fff; }
+  .actions {
+    margin-top: auto;
+    padding-top: 22px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .actions .btn { flex: 1; min-width: 140px; font-size: 17px; }
+
+  .fade { animation: fadeIn .5s ease both; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== 今日行程卡 ===== */
+  #final {
+    max-width: 640px;
+    margin: 24px auto;
+    padding: 0 20px;
+  }
+  .ticket {
+    background: var(--card);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .ticket-head {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--pink) 100%);
+    padding: 26px 28px 22px;
+    text-align: center;
+    color: #fff;
+  }
+  .ticket-head h2 {
+    font-family: "Huninn", sans-serif;
+    font-weight: 400;
+    font-size: 32px;
+    text-shadow: 0 2px 6px rgba(52, 73, 94, .2);
+  }
+  .ticket-head p { font-size: 15px; opacity: .95; }
+  .ticket-body { padding: 10px 28px 26px; }
+  .ticket-row {
+    display: flex;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 2px dashed var(--blue-l);
+  }
+  .ticket-row:last-child { border-bottom: none; }
+  .ticket-row .emo {
+    font-size: 40px;
+    width: 64px; height: 64px;
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    background: var(--blue-l);
+    border-radius: 18px;
+  }
+  .ticket-row:nth-child(2) .emo { background: var(--pink-l); }
+  .ticket-row .tag { font-size: 13px; color: var(--pink-d); font-weight: 700; }
+  .ticket-row h3 {
+    font-family: "Huninn", sans-serif;
+    font-weight: 400;
+    font-size: 22px;
+    margin: 2px 0 4px;
+  }
+  .ticket-row p { font-size: 15px; }
+  .ticket-row .addr { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .ticket-row .addr a { color: var(--blue-d); font-weight: 700; text-decoration: none; margin-left: 4px; }
+  .ticket-row .addr a:hover { text-decoration: underline; }
+  .ticket-foot { text-align: center; padding: 0 28px 28px; }
+  .ticket-foot .btn { min-width: 220px; }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 10px 20px 30px;
+  }
+
+  #confetti {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  [hidden] { display: none !important; }
+
+  /* ===== 手機版 ===== */
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+    .result-card { min-height: 0; }
+    .steps li { font-size: 13px; padding: 8px; flex-direction: column; gap: 4px; text-align: center; }
+    header { padding-top: 20px; }
+    .brand p { font-size: 14px; }
+  }
+  @media (max-width: 480px) {
+    .card { padding: 20px; }
+    .result-name { font-size: 26px; }
+    .ticket-body, .ticket-head { padding-left: 18px; padding-right: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>逛逛「<span class="peach">桃花園</span>」</h1>
+    <p>不知道去桃園哪裡玩？轉一轉輪盤，交給命運決定！</p>
+  </div>
+  <button id="muteBtn" aria-pressed="false">🔊 音效開</button>
+</header>
+
+<ol class="steps" id="steps">
+  <li><span class="num">1</span><span>抽區</span></li>
+  <li><span class="num">2</span><span>抽景點</span></li>
+  <li><span class="num">3</span><span>抽美食</span></li>
+  <li><span class="num">4</span><span>行程卡</span></li>
+</ol>
+
+<main id="play">
+  <section class="card wheel-card">
+    <h2 id="wheelTitle">第一步：抽出今天的目的地</h2>
+    <div class="wheel-wrap">
+      <div class="pointer" aria-hidden="true"></div>
+      <canvas id="wheel" aria-label="抽籤輪盤"></canvas>
+    </div>
+    <button class="btn btn-main" id="spinBtn">開始轉！</button>
+  </section>
+
+  <section class="card result-card" id="result" aria-live="polite"></section>
+</main>
+
+<section id="final" hidden aria-live="polite"></section>
+
+<footer>資料整理自網路公開資訊，景點與店家營業時間可能變動，出發前請再確認喔！</footer>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+/* =========================================================
+   資料：13 區，每區 4 個景點、4 間餐廳
+   類型圖示：🏞️ 自然  🏛️ 古蹟文化  🛍️ 老街商圈  🎡 親子樂園
+            🍜 小吃  🍲 餐廳  ☕ 咖啡甜點
+   ========================================================= */
+const DATA = [
+  {
+    name: "桃園區", emoji: "🏙️",
+    intro: "市政中心所在，老廟、日式神社和新潮的藝文特區一次逛完。",
+    spots: [
+      { name: "虎頭山公園", type: "🏞️", desc: "桃園人氣最高的城市綠洲，步道好走，還能眺望市區夜景。", address: "桃園市桃園區虎頭山風景特定區" },
+      { name: "忠烈祠暨神社文化園區", type: "🏛️", desc: "台灣保存最完整的日式神社建築之一，拍起來像飛到日本。", address: "桃園市桃園區成功路三段200號" },
+      { name: "桃園市立圖書館總館", type: "🏛️", desc: "以「生命樹」為設計概念的新地標，館內還有書店和咖啡廳。", address: "桃園市桃園區（藝文特區）" },
+      { name: "景福宮", type: "🏛️", desc: "在地人口中的「大廟」，兩百多年歷史的桃園信仰中心。", address: "桃園市桃園區中正路208號" }
+    ],
+    foods: [
+      { name: "大廟生炒羊肉", type: "🍜", desc: "在地老店，生炒羊肉香氣十足，用餐時間常大排長龍。", address: "桃園市桃園區（朝陽森林公園附近）" },
+      { name: "老賊壽司", type: "🍜", desc: "營業超過25年的銅板價壽司，桃園人從小吃到大。", address: "桃園市桃園區" },
+      { name: "品華殿", type: "🍲", desc: "砂鍋魚頭專賣店，澎湃用料多到快滿出鍋。", address: "桃園市桃園區中山路645號" },
+      { name: "小木屋牛肉麵", type: "🍜", desc: "桃園超人氣牛肉麵，吃飯時間幾乎都要排隊。", address: "桃園市桃園區" }
+    ]
+  },
+  {
+    name: "中壢區", emoji: "🏮",
+    intro: "桃園人口最多的區，夜市、眷村和青埔的新景點都在這裡。",
+    spots: [
+      { name: "老街溪步道", type: "🏞️", desc: "全桃園造訪人次最多的景點，河岸步道適合散步、騎單車。", address: "桃園市中壢區老街溪沿岸" },
+      { name: "Xpark 水生公園", type: "🎡", desc: "都會型水族館，企鵝、水母和海洋生物超療癒。", address: "桃園市中壢區春德路105號" },
+      { name: "馬祖新村", type: "🏛️", desc: "眷村改造的文創園區，紅磚老屋和藝術展覽很好拍。", address: "桃園市中壢區" },
+      { name: "中原夜市", type: "🛍️", desc: "中原大學旁的學生夜市，平價小吃一條街吃到飽。", address: "桃園市中壢區實踐路一帶" }
+    ],
+    foods: [
+      { name: "老牌曾水煎包", type: "🍜", desc: "中壢國小對面的排隊名店，煎包外酥內多汁。", address: "桃園市中壢區（中壢國小對面）" },
+      { name: "新明牛肉麵", type: "🍜", desc: "眷村起家的老字號紅燒牛肉麵。", address: "桃園市中壢區中平路" },
+      { name: "張豐盛商行", type: "☕", desc: "中壢歷史悠久的老店，花生糖不黏牙，冰品也很有人氣。", address: "桃園市中壢區" },
+      { name: "不老麻辣鴨血臭豆腐", type: "🍜", desc: "麻辣湯頭夠味，鴨血和臭豆腐都很入味。", address: "桃園市中壢區民族路60號" }
+    ]
+  },
+  {
+    name: "平鎮區", emoji: "🍚",
+    intro: "龍岡眷村的雲南味聚落，一碗米干吃出滿滿異國風情。",
+    spots: [
+      { name: "忠貞新村文化園區", type: "🏛️", desc: "保存滇緬眷村故事的文化園區，認識米干背後的歷史。", address: "桃園市平鎮區" },
+      { name: "1895乙未保台紀念公園", type: "🏞️", desc: "以「圓」為意象的清水模公園，紀念乙未戰役。", address: "桃園市平鎮區復旦路二段" },
+      { name: "新勢公園", type: "🏞️", desc: "與老街溪步道相連的大型公園，適合野餐散步。", address: "桃園市平鎮區" },
+      { name: "八角塘", type: "🏞️", desc: "平靜的埤塘美景，背後藏著乙未抗日的歷史故事。", address: "桃園市平鎮區南平路一帶" }
+    ],
+    foods: [
+      { name: "阿美米干", type: "🍜", desc: "開業近40年的米干名店，豬骨湯頭清爽順口。", address: "桃園市平鎮區（龍岡忠貞市場周邊）" },
+      { name: "阿嬌米干", type: "🍜", desc: "龍岡在地人從小吃到大的老字號米干。", address: "桃園市平鎮區（龍岡忠貞市場周邊）" },
+      { name: "國旗屋", type: "🍜", desc: "掛滿國旗、非常好認的眷村米干店。", address: "桃園市平鎮區（龍岡忠貞市場周邊）" },
+      { name: "鼎泰香台式烤鴨", type: "🍲", desc: "排隊半小時起跳的烤鴨，辣炒鴨架超級下飯。", address: "桃園市平鎮區" }
+    ]
+  },
+  {
+    name: "八德區", emoji: "🌳",
+    intro: "埤塘串起的親子城市，公園和觀光工廠最適合全家出遊。",
+    spots: [
+      { name: "大湳森林公園", type: "🏞️", desc: "結合滯洪池的森林公園，大片綠地超療癒。", address: "桃園市八德區" },
+      { name: "八德埤塘生態公園", type: "🏞️", desc: "保留桃園特有埤塘地景的生態公園。", address: "桃園市八德區" },
+      { name: "77巧克力共和國", type: "🎡", desc: "巧克力觀光工廠，可以DIY甜點還能免費試吃。", address: "桃園市八德區" },
+      { name: "興仁花園夜市", type: "🛍️", desc: "佔地6000坪的大型夜市，吃喝玩樂通通有。", address: "桃園市八德區" }
+    ],
+    foods: [
+      { name: "石頭燒肉", type: "🍲", desc: "八德旗艦店空間寬敞，適合朋友一起聚餐烤肉。", address: "桃園市八德區" },
+      { name: "山東小吃店", type: "🍜", desc: "沒有招牌的眷村小吃，大滷麵和紅燒豆腐是招牌。", address: "桃園市八德區（大湳市場附近）" },
+      { name: "劉家大腸麵線肉圓", type: "🍜", desc: "在地人推薦的大腸麵線配肉圓，古早味滿分。", address: "桃園市八德區" },
+      { name: "雙月食品", type: "🍲", desc: "米其林必比登推薦名店的八德分店，主打家常雞湯。", address: "桃園市八德區" }
+    ]
+  },
+  {
+    name: "楊梅區", emoji: "🍵",
+    intro: "保留客家庄風貌的鐵道小鎮，老街、茶園和客家菜都很道地。",
+    spots: [
+      { name: "富岡老街", type: "🛍️", desc: "車站前的巴洛克洋樓老街，充滿鐵道小鎮氣氛。", address: "桃園市楊梅區富岡" },
+      { name: "秀才登山步道", type: "🏞️", desc: "好走的郊山步道，山頂可以眺望楊梅市區。", address: "桃園市楊梅區" },
+      { name: "楊梅故事園區", type: "🏛️", desc: "日式老宿舍改造的文化園區，安靜又好拍。", address: "桃園市楊梅區" },
+      { name: "埔心牧場", type: "🎡", desc: "可以餵動物、在草地上奔跑的親子牧場。", address: "桃園市楊梅區" }
+    ],
+    foods: [
+      { name: "大楊梅鵝莊", type: "🍲", desc: "民國76年創立，鵝肉和鵝油燜筍是必點招牌。", address: "桃園市楊梅區大平街" },
+      { name: "佳園寶麵食館", type: "🍜", desc: "前鼎泰豐師傅開的店，用一半價格吃到小籠湯包。", address: "桃園市楊梅區（頭重溪柚子公園附近）" },
+      { name: "八方園", type: "🍲", desc: "百年三合院裡的客家餐廳，地瓜飯吃到飽。", address: "桃園市楊梅區校前路580號" },
+      { name: "新興快炒店", type: "🍲", desc: "開業超過一甲子的無菜單客家家常快炒。", address: "桃園市楊梅區中山北路一段444號" }
+    ]
+  },
+  {
+    name: "蘆竹區", emoji: "🌲",
+    intro: "機場旁的南崁商圈，森林步道和異國美食都藏在這裡。",
+    spots: [
+      { name: "羊稠森林步道", type: "🏞️", desc: "穿梭在樹林間的步道，夏天走起來也很涼爽。", address: "桃園市蘆竹區" },
+      { name: "大古山步道", type: "🏞️", desc: "春天有野百合綻放的秘境步道。", address: "桃園市蘆竹區" },
+      { name: "坑子溪休閒農業區", type: "🎡", desc: "農場、茶廠和田園風光的休閒農業區。", address: "桃園市蘆竹區" },
+      { name: "義美觀光工廠", type: "🎡", desc: "認識義美食品的製作過程，順便買點心。", address: "桃園市蘆竹區" }
+    ],
+    foods: [
+      { name: "大明星頂流涮涮鍋", type: "🍲", desc: "主打頂級肉品和現流海鮮的南崁火鍋。", address: "桃園市蘆竹區南崁" },
+      { name: "野上麵包坊", type: "☕", desc: "日本職人創辦的麵包店，法國麵包開賣就秒殺。", address: "桃園市蘆竹區南崁" },
+      { name: "烹鼎鵝肉", type: "🍜", desc: "南崁在地人推薦的鵝肉晚餐好選擇。", address: "桃園市蘆竹區南崁" },
+      { name: "越昤咖啡河粉", type: "🍜", desc: "道地越南河粉配上濃郁越式咖啡。", address: "桃園市蘆竹區南崁" }
+    ]
+  },
+  {
+    name: "大溪區", emoji: "🏯",
+    intro: "百年老街與豆干的故鄉，還有湖光山色的慈湖。",
+    spots: [
+      { name: "大溪老街", type: "🛍️", desc: "巴洛克立面的百年老街，邊走邊吃豆干最對味。", address: "桃園市大溪區和平路" },
+      { name: "慈湖", type: "🏞️", desc: "湖光山色加上衛兵交接儀式，大溪必訪景點。", address: "桃園市大溪區復興路一段1097號" },
+      { name: "大溪木藝生態博物館", type: "🏛️", desc: "由日式宿舍群組成的博物館，認識大溪木藝文化。", address: "桃園市大溪區（老城區）" },
+      { name: "大溪老茶廠", type: "🏛️", desc: "1926年興建的製茶廠，木造結構和藍灰窗櫺超有氣氛。", address: "桃園市大溪區復興路二段732巷80號" }
+    ],
+    foods: [
+      { name: "阿嬤小吃店", type: "🍜", desc: "手工糯米腸配大蒜，老街必吃古早味。", address: "桃園市大溪區和平路63號" },
+      { name: "黃大目豆干", type: "🍜", desc: "大溪最具代表性的豆干老店，Q彈又入味。", address: "桃園市大溪區（大溪老街）" },
+      { name: "賴媽媽豆花", type: "☕", desc: "老街上的人氣豆花，逛累了來一碗剛剛好。", address: "桃園市大溪區和平路44號" },
+      { name: "阿美麵店", type: "🍜", desc: "高CP值的在地傳統麵店，適合飽餐一頓。", address: "桃園市大溪區" }
+    ]
+  },
+  {
+    name: "龍潭區", emoji: "💧",
+    intro: "石門水庫和龍潭大池所在，客家菜和活魚料理是招牌。",
+    spots: [
+      { name: "龍潭大池", type: "🏞️", desc: "有九曲橋和龍形步道的大湖，傍晚散步很舒服。", address: "桃園市龍潭區" },
+      { name: "石門水庫", type: "🏞️", desc: "北台灣重要水庫，湖景遼闊，秋天還有楓紅。", address: "桃園市龍潭區（石門水庫風景區）" },
+      { name: "小人國主題樂園", type: "🎡", desc: "迷你世界建築加上遊樂設施，大人小孩都好玩。", address: "桃園市龍潭區高原路891號" },
+      { name: "三坑老街", type: "🛍️", desc: "被稱為「龍潭第一街」，還保留客家洗衣池「黑白洗」。", address: "桃園市龍潭區三坑子" }
+    ],
+    foods: [
+      { name: "橋頭老麵店", type: "🍜", desc: "在地60年的傳奇古早味麵店。", address: "桃園市龍潭區" },
+      { name: "糧園茶藝客家小館", type: "🍲", desc: "古早田園風的客家菜館，梅干扣肉、客家小炒必點。", address: "桃園市龍潭區雙連街90號" },
+      { name: "石門活魚街", type: "🍲", desc: "水庫周邊的活魚料理聚落，一魚多吃最過癮。", address: "桃園市龍潭區（石門水庫周邊）" },
+      { name: "全家福客家菜館", type: "🍲", desc: "在地人愛吃的道地客家菜館。", address: "桃園市龍潭區龍新路1016巷19號" }
+    ]
+  },
+  {
+    name: "龜山區", emoji: "🎋",
+    intro: "眷村文化與百年古剎所在，也藏著許多在地人的私房美食。",
+    spots: [
+      { name: "壽山巖觀音寺", type: "🏛️", desc: "兩百多年歷史的古剎，春天櫻花盛開。", address: "桃園市龜山區萬壽路二段6巷111號" },
+      { name: "憲光二村", type: "🏛️", desc: "電視劇《光陰的故事》取景地，眷村氛圍滿滿。", address: "桃園市龜山區大同路138巷" },
+      { name: "龜山眷村故事館", type: "🏛️", desc: "陸光三村唯一保留的老建築，展示眷村文史。", address: "桃園市龜山區光峰路43號" },
+      { name: "桃園酒廠", type: "🎡", desc: "全台唯一生產日式清酒的酒廠，可參觀釀酒歷史。", address: "桃園市龜山區文化一路55號" }
+    ],
+    foods: [
+      { name: "陳秋剛綿綿冰", type: "☕", desc: "當季新鮮水果純手工製作的綿綿冰。", address: "桃園市龜山區" },
+      { name: "BREVA 布浬法餐廳", type: "🍲", desc: "藍帶主廚的手工披薩，招牌芝加哥深盤披薩份量驚人。", address: "桃園市龜山區" },
+      { name: "三村刈包", type: "🍜", desc: "平日限定，肥瘦比例可以客製化的刈包。", address: "桃園市龜山區復興北路6巷21號" },
+      { name: "家芬豆花・火鍋", type: "🍲", desc: "把豆花放進鍋裡煮的新奇火鍋。", address: "桃園市龜山區" }
+    ]
+  },
+  {
+    name: "大園區", emoji: "✈️",
+    intro: "桃園機場所在地，漁港海鮮和濕地生態一次滿足。",
+    spots: [
+      { name: "竹圍漁港", type: "🏞️", desc: "北台灣熱門漁港，現撈海鮮大口吃。", address: "桃園市大園區竹圍" },
+      { name: "橫山書法藝術公園", type: "🏛️", desc: "結合書法藝術館與大片綠地的藝術公園。", address: "桃園市大園區" },
+      { name: "許厝港濕地", type: "🏞️", desc: "候鳥棲息的重要濕地，秋冬賞鳥正是時候。", address: "桃園市大園區" },
+      { name: "草漯沙丘", type: "🏞️", desc: "北台灣少見的海岸沙丘地景，夕陽超美。", address: "桃園市大園區、觀音區沿海" }
+    ],
+    foods: [
+      { name: "正光照相館", type: "🍜", desc: "賣米腸香腸切的老店，招牌綜合切一次吃三種。", address: "桃園市大園區" },
+      { name: "大園報紙蛋餅", type: "🍜", desc: "大園人的早餐記憶，用報紙包著的古早味蛋餅。", address: "桃園市大園區" },
+      { name: "亞仙越南麵包", type: "🍜", desc: "酥脆法棍夾滿越式餡料，份量十足。", address: "桃園市大園區" },
+      { name: "丰丼炙燒食堂", type: "🍲", desc: "炙燒丼飯專賣，炙燒松阪豚丼是招牌。", address: "桃園市大園區（大園商圈）" }
+    ]
+  },
+  {
+    name: "觀音區", emoji: "🪷",
+    intro: "桃園蓮花的故鄉，紅磚燈塔、藻礁和海岸風光很迷人。",
+    spots: [
+      { name: "觀音蓮花園", type: "🏞️", desc: "夏季蓮花盛開的休閒農業區，還能體驗大王蓮。", address: "桃園市觀音區" },
+      { name: "白沙岬燈塔", type: "🏛️", desc: "台灣唯一以紅磚與石頭建造的燈塔。", address: "桃園市觀音區" },
+      { name: "水之丘主題公園", type: "🎡", desc: "有三層樓高溜滑梯的夢幻親子公園。", address: "桃園市觀音區" },
+      { name: "觀新藻礁", type: "🏞️", desc: "珍貴的藻礁生態保護區，退潮時最好觀察。", address: "桃園市觀音區" }
+    ],
+    foods: [
+      { name: "蓮荷園", type: "🍲", desc: "可以吃到特色蓮花料理的休閒農場。", address: "桃園市觀音區" },
+      { name: "青林農場", type: "☕", desc: "四季花海農場，賞花之後順便休息吃點東西。", address: "桃園市觀音區" },
+      { name: "李桃小餐館", type: "🍲", desc: "觀音在地人推薦的小餐館。", address: "桃園市觀音區" },
+      { name: "裡麵坐", type: "🍜", desc: "觀音在地人推薦的麵店，進來裡面坐吧！", address: "桃園市觀音區" }
+    ]
+  },
+  {
+    name: "新屋區", emoji: "🌊",
+    intro: "漁港、綠色隧道和百年石滬，騎單車吹海風最舒服。",
+    spots: [
+      { name: "永安漁港", type: "🏞️", desc: "有彩虹橋的漁港，海鮮和夕陽都很有名。", address: "桃園市新屋區永安漁港" },
+      { name: "新屋綠色走廊", type: "🏞️", desc: "北台灣最具規模的濱海自行車道，綠蔭加海景。", address: "桃園市新屋區觀海路" },
+      { name: "范姜古厝", type: "🏛️", desc: "客家古厝群，保存傳統建築之美。", address: "桃園市新屋區" },
+      { name: "百年石滬群", type: "🏞️", desc: "先民用石頭堆砌的捕魚陷阱，退潮時最壯觀。", address: "桃園市新屋區沿海" }
+    ],
+    foods: [
+      { name: "建業鵝肉美食館", type: "🍲", desc: "自產自銷的神農獎鵝肉，建議先訂位。", address: "桃園市新屋區中山西路一段111號280巷" },
+      { name: "永安漁港海鮮街", type: "🍲", desc: "漁港旁的海鮮餐廳聚落，現撈海產直接下鍋。", address: "桃園市新屋區永安漁港" },
+      { name: "綠色走廊小吃攤", type: "🍜", desc: "騎車騎到一半，在海邊吃小吃看夕陽。", address: "桃園市新屋區觀海路" },
+      { name: "南北合麵食館", type: "🍜", desc: "在地人推薦的麵食館。", address: "桃園市新屋區" }
+    ]
+  },
+  {
+    name: "復興區", emoji: "⛰️",
+    intro: "原住民部落與高山森林，桃園最遠、也最療癒的一區。",
+    spots: [
+      { name: "拉拉山", type: "🏞️", desc: "以巨木群和水蜜桃聞名的高山森林。", address: "桃園市復興區華陵里" },
+      { name: "東眼山國家森林遊樂區", type: "🏞️", desc: "柳杉林步道芬多精滿滿，適合森林浴。", address: "桃園市復興區" },
+      { name: "角板山公園", type: "🏞️", desc: "可以眺望大漢溪的山城公園，旁邊就是老街。", address: "桃園市復興區（角板山）" },
+      { name: "小烏來天空步道", type: "🏞️", desc: "懸空的透明步道，腳下就是瀑布和溪谷。", address: "桃園市復興區" }
+    ],
+    foods: [
+      { name: "角板山老店家小吃", type: "🍲", desc: "開業超過20年的原住民風味餐廳。", address: "桃園市復興區（角板山老街）" },
+      { name: "山月茶屋", type: "☕", desc: "坐擁整片茶園景觀的純白咖啡館。", address: "桃園市復興區枕頭山7鄰11之5號" },
+      { name: "丸山咖啡", type: "☕", desc: "在山林裡喝咖啡，眺望整片山景。", address: "桃園市復興區" },
+      { name: "森鄰水岸景觀咖啡館", type: "☕", desc: "依山傍水的景觀咖啡館，放空的好地方。", address: "桃園市復興區" }
+    ]
+  }
+];
+
+/* =========================================================
+   狀態
+   ========================================================= */
+const STAGE_TITLES = [
+  () => "第一步：抽出今天的目的地",
+  () => `第二步：在${picks.district.name}抽一個景點`,
+  () => `第三步：在${picks.district.name}抽一頓美食`
+];
+let stage = 0;              // 0 抽區、1 抽景點、2 抽餐廳、3 行程卡
+let picks = { district: null, spot: null, food: null };
+let rotation = 0;           // 輪盤目前角度（弧度）
+let spinning = false;
+let muted = false;
+
+const TAU = Math.PI * 2;
+const $ = (id) => document.getElementById(id);
+const wheel = $("wheel");
+const ctx = wheel.getContext("2d");
+const WHEEL_SIZE = 440;
+
+/* =========================================================
+   輪盤繪製
+   ========================================================= */
+function setupCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  wheel.width = WHEEL_SIZE * dpr;
+  wheel.height = WHEEL_SIZE * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function currentItems() {
+  if (stage === 0) return DATA.map(d => d.name);
+  if (stage === 1) return picks.district.spots.map(s => s.name);
+  return picks.district.foods.map(f => f.name);
+}
+
+function segmentColor(i, n) {
+  const blue = "#bfe3f6", pink = "#fbd2e1", third = "#e6f0fb";
+  if (n % 2 === 1 && i === n - 1) return third;   // 奇數格時避免頭尾同色
+  return i % 2 === 0 ? blue : pink;
+}
+
+function drawWheel() {
+  const items = currentItems();
+  const n = items.length;
+  const seg = TAU / n;
+  const c = WHEEL_SIZE / 2;
+  const R = c - 10;
+
+  ctx.clearRect(0, 0, WHEEL_SIZE, WHEEL_SIZE);
+
+  // 外框陰影
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(c, c, R + 4, 0, TAU);
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "rgba(79,159,207,0.25)";
+  ctx.shadowBlur = 14;
+  ctx.fill();
+  ctx.restore();
+
+  for (let i = 0; i < n; i++) {
+    const start = -Math.PI / 2 + i * seg + rotation;
+    const end = start + seg;
+
+    ctx.beginPath();
+    ctx.moveTo(c, c);
+    ctx.arc(c, c, R, start, end);
+    ctx.closePath();
+    ctx.fillStyle = segmentColor(i, n);
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+
+    // 文字（沿半徑方向）
+    ctx.save();
+    ctx.translate(c, c);
+    const mid = ((start + seg / 2) % TAU + TAU) % TAU;
+    const leftSide = mid > Math.PI / 2 && mid < Math.PI * 1.5;   // 左半邊的字翻正，避免倒著看
+    ctx.rotate(leftSide ? mid + Math.PI : mid);
+    ctx.textAlign = leftSide ? "left" : "right";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#34495e";
+    const maxW = R * 0.72;
+    let size = n > 8 ? 19 : 21;
+    ctx.font = `${size}px Huninn, "Noto Sans TC", sans-serif`;
+    while (ctx.measureText(items[i]).width > maxW && size > 11) {
+      size -= 1;
+      ctx.font = `${size}px Huninn, "Noto Sans TC", sans-serif`;
+    }
+    ctx.fillText(items[i], leftSide ? -(R - 16) : R - 16, 0);
+    ctx.restore();
+  }
+
+  // 外圈
+  ctx.beginPath();
+  ctx.arc(c, c, R, 0, TAU);
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = "#ffffff";
+  ctx.stroke();
+
+  // 中心圓
+  ctx.beginPath();
+  ctx.arc(c, c, 42, 0, TAU);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(c, c, 34, 0, TAU);
+  const g = ctx.createLinearGradient(c - 34, c - 34, c + 34, c + 34);
+  g.addColorStop(0, "#f8c3d6");
+  g.addColorStop(1, "#e0789f");
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `24px Huninn, "Noto Sans TC", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("桃", c, c + 1);
+}
+
+// 指針（正上方）目前指到的格子
+function indexAtPointer(rot, n) {
+  const seg = TAU / n;
+  const a = ((-rot) % TAU + TAU) % TAU;
+  return Math.floor(a / seg) % n;
+}
+
+/* =========================================================
+   轉動
+   ========================================================= */
+function spin() {
+  if (spinning) return;
+  ensureAudio();
+  spinning = true;
+  setButtonsDisabled(true);
+
+  const n = currentItems().length;
+  const seg = TAU / n;
+  const target = Math.floor(Math.random() * n);
+  const jitter = (Math.random() - 0.5) * seg * 0.6;            // 不要每次都停在正中間
+  const desired = ((TAU - (target + 0.5) * seg + jitter) % TAU + TAU) % TAU;
+  const current = ((rotation % TAU) + TAU) % TAU;
+  const extraTurns = 5 + Math.floor(Math.random() * 2);
+  const delta = ((desired - current) + TAU) % TAU + TAU * extraTurns;
+
+  const startRot = rotation;
+  const duration = 4200 + Math.random() * 800;
+  const t0 = performance.now();
+  let lastIdx = indexAtPointer(rotation, n);
+  let lastTick = 0;
+
+  function frame(now) {
+    const t = Math.min((now - t0) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 4);                       // 先快後慢
+    rotation = startRot + delta * eased;
+    drawWheel();
+
+    const idx = indexAtPointer(rotation, n);
+    if (idx !== lastIdx && now - lastTick > 35) {
+      playTick();
+      lastTick = now;
+    }
+    lastIdx = idx;
+
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      spinning = false;
+      onSpinEnd(indexAtPointer(rotation, n));
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function onSpinEnd(idx) {
+  playDing();
+  launchConfetti();
+  if (stage === 0) {
+    picks = { district: DATA[idx], spot: null, food: null };
+  } else if (stage === 1) {
+    picks.spot = picks.district.spots[idx];
+  } else if (stage === 2) {
+    picks.food = picks.district.foods[idx];
+  }
+  render();
+}
+
+function setButtonsDisabled(disabled) {
+  document.querySelectorAll("button.btn").forEach(b => { b.disabled = disabled; });
+}
+
+/* =========================================================
+   畫面
+   ========================================================= */
+function hasResult() {
+  if (stage === 0) return !!picks.district;
+  if (stage === 1) return !!picks.spot;
+  if (stage === 2) return !!picks.food;
+  return false;
+}
+
+function mapUrl(item) {
+  return "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent(item.name + " " + item.address);
+}
+
+function render() {
+  updateSteps();
+
+  if (stage === 3) {
+    $("play").hidden = true;
+    $("final").hidden = false;
+    renderFinal();
+    return;
+  }
+  $("play").hidden = false;
+  $("final").hidden = true;
+
+  $("wheelTitle").textContent = STAGE_TITLES[stage]();
+  drawWheel();
+
+  const spinBtn = $("spinBtn");
+  const done = hasResult();
+  spinBtn.disabled = done;
+  spinBtn.textContent = done ? "已抽出！看右邊結果" : "開始轉！";
+
+  const box = $("result");
+  box.innerHTML = "";
+
+  if (stage === 0 && !done) {
+    box.innerHTML = `
+      <span class="label">怎麼玩？</span>
+      <div class="hint fade">
+        <span class="big">🎡</span>
+        按下「開始轉」，讓輪盤幫你決定<br>今天要去桃園哪一區！<br><br>
+        接著再抽一個景點、一間餐廳，<br>就是你的「今日行程」。
+      </div>`;
+    return;
+  }
+
+  if (stage === 0 && done) {
+    const d = picks.district;
+    box.innerHTML = `
+      <div class="fade" style="display:flex;flex-direction:column;flex:1">
+        <span class="label">你抽到的是</span>
+        <div class="result-emoji">${d.emoji}</div>
+        <div class="result-name">${d.name}</div>
+        <p class="result-desc">${d.intro}</p>
+        <div class="actions">
+          <button class="btn btn-sub" id="respinBtn">🔄 重轉</button>
+          <button class="btn btn-next" id="nextBtn">下一步：抽景點 →</button>
+        </div>
+      </div>`;
+    bindActions();
+    return;
+  }
+
+  // 景點、餐廳階段
+  const isSpot = stage === 1;
+  const item = isSpot ? picks.spot : picks.food;
+  const areaHtml = `
+    <div class="picked-area">📍 目的地：<b>${picks.district.emoji} ${picks.district.name}</b>
+      ${stage === 2 && picks.spot ? `　｜　景點：<b>${picks.spot.type} ${picks.spot.name}</b>` : ""}
+    </div>`;
+
+  if (!item) {
+    box.innerHTML = `
+      ${areaHtml}
+      <div class="hint fade">
+        <span class="big">${isSpot ? "🗺️" : "🍽️"}</span>
+        ${isSpot ? `轉動輪盤，從${picks.district.name}的<br>4個景點中抽出一個吧！`
+                 : `玩累了該吃飯囉！<br>從${picks.district.name}的4間美食中抽一間。`}
+      </div>`;
+    return;
+  }
+
+  box.innerHTML = `
+    ${areaHtml}
+    <div class="fade" style="display:flex;flex-direction:column;flex:1">
+      <span class="label">${isSpot ? "抽中的景點" : "抽中的美食"}</span>
+      <div class="result-emoji">${item.type}</div>
+      <div class="result-name">${item.name}</div>
+      <p class="result-desc">${item.desc}</p>
+      <div class="info-row"><span>🏠</span><span>${item.address}</span></div>
+      <a class="map-link" href="${mapUrl(item)}" target="_blank" rel="noopener">🗺️ 在 Google 地圖開啟</a>
+      <div class="actions">
+        <button class="btn btn-sub" id="respinBtn">🔄 重轉</button>
+        <button class="btn btn-next" id="nextBtn">${isSpot ? "下一步：抽美食 →" : "看今日行程卡 →"}</button>
+      </div>
+    </div>`;
+  bindActions();
+}
+
+function bindActions() {
+  $("respinBtn").addEventListener("click", spin);
+  $("nextBtn").addEventListener("click", nextStage);
+}
+
+function nextStage() {
+  if (spinning) return;
+  stage += 1;
+  rotation = 0;
+  render();
+  if (stage === 3) launchConfetti();
+}
+
+function updateSteps() {
+  const lis = document.querySelectorAll("#steps li");
+  lis.forEach((li, i) => {
+    li.classList.toggle("active", i === stage);
+    li.classList.toggle("done", i < stage);
+  });
+}
+
+function renderFinal() {
+  const d = picks.district, s = picks.spot, f = picks.food;
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
+  $("final").innerHTML = `
+    <div class="ticket fade">
+      <div class="ticket-head">
+        <h2>🌸 今日桃園籤 🌸</h2>
+        <p>${dateStr}・命運幫你排好行程了！</p>
+      </div>
+      <div class="ticket-body">
+        <div class="ticket-row">
+          <div class="emo">${d.emoji}</div>
+          <div>
+            <div class="tag">目的地</div>
+            <h3>${d.name}</h3>
+            <p>${d.intro}</p>
+          </div>
+        </div>
+        <div class="ticket-row">
+          <div class="emo">${s.type}</div>
+          <div>
+            <div class="tag">景點</div>
+            <h3>${s.name}</h3>
+            <p>${s.desc}</p>
+            <p class="addr">🏠 ${s.address}<a href="${mapUrl(s)}" target="_blank" rel="noopener">地圖 ↗</a></p>
+          </div>
+        </div>
+        <div class="ticket-row">
+          <div class="emo">${f.type}</div>
+          <div>
+            <div class="tag">美食</div>
+            <h3>${f.name}</h3>
+            <p>${f.desc}</p>
+            <p class="addr">🏠 ${f.address}<a href="${mapUrl(f)}" target="_blank" rel="noopener">地圖 ↗</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="ticket-foot">
+        <button class="btn btn-main" id="againBtn">🎡 再玩一次</button>
+      </div>
+    </div>`;
+  $("againBtn").addEventListener("click", restart);
+}
+
+function restart() {
+  stage = 0;
+  picks = { district: null, spot: null, food: null };
+  rotation = 0;
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* =========================================================
+   音效（Web Audio API 即時產生，不需音效檔）
+   ========================================================= */
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+}
+
+function playTick() {
+  if (muted || !audioCtx) return;
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(1500, t);
+  gain.gain.setValueAtTime(0.12, t);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(t);
+  osc.stop(t + 0.05);
+}
+
+function playDing() {
+  if (muted || !audioCtx) return;
+  const t = audioCtx.currentTime;
+  [[1318.5, 0], [1046.5, 0.2]].forEach(([freq, delay]) => {   // 叮（E6）咚（C6）
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, t + delay);
+    gain.gain.setValueAtTime(0.0001, t + delay);
+    gain.gain.exponentialRampToValueAtTime(0.3, t + delay + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.8);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t + delay);
+    osc.stop(t + delay + 0.85);
+  });
+}
+
+$("muteBtn").addEventListener("click", () => {
+  muted = !muted;
+  $("muteBtn").textContent = muted ? "🔇 音效關" : "🔊 音效開";
+  $("muteBtn").setAttribute("aria-pressed", String(muted));
+});
+
+/* =========================================================
+   彩帶動畫
+   ========================================================= */
+const confettiCanvas = $("confetti");
+const cctx = confettiCanvas.getContext("2d");
+let particles = [];
+let confettiRunning = false;
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function resizeConfetti() {
+  const dpr = window.devicePixelRatio || 1;
+  confettiCanvas.width = window.innerWidth * dpr;
+  confettiCanvas.height = window.innerHeight * dpr;
+  cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function launchConfetti() {
+  if (reduceMotion) return;
+  const colors = ["#a9d8f2", "#f8c3d6", "#e0789f", "#4f9fcf", "#ffe08a", "#ffffff"];
+  const w = window.innerWidth;
+  for (let i = 0; i < 150; i++) {
+    particles.push({
+      x: w / 2 + (Math.random() - 0.5) * w * 0.3,
+      y: window.innerHeight * 0.35,
+      vx: (Math.random() - 0.5) * 14,
+      vy: -Math.random() * 13 - 5,
+      size: Math.random() * 7 + 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * TAU,
+      vr: (Math.random() - 0.5) * 0.3,
+      life: 0
+    });
+  }
+  if (!confettiRunning) {
+    confettiRunning = true;
+    requestAnimationFrame(stepConfetti);
+  }
+}
+
+function stepConfetti() {
+  cctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  particles.forEach(p => {
+    p.vy += 0.35;
+    p.vx *= 0.99;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.rot += p.vr;
+    p.life += 1;
+    cctx.save();
+    cctx.translate(p.x, p.y);
+    cctx.rotate(p.rot);
+    cctx.fillStyle = p.color;
+    cctx.globalAlpha = Math.max(0, 1 - p.life / 160);
+    cctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+    cctx.restore();
+  });
+  particles = particles.filter(p => p.y < window.innerHeight + 20 && p.life < 160);
+  if (particles.length) {
+    requestAnimationFrame(stepConfetti);
+  } else {
+    confettiRunning = false;
+    cctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  }
+}
+
+/* =========================================================
+   初始化
+   ========================================================= */
+$("spinBtn").addEventListener("click", spin);
+window.addEventListener("resize", resizeConfetti);
+setupCanvas();
+resizeConfetti();
+render();
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => drawWheel());
+}
+</script>
+</body>
+</html>
